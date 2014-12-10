@@ -66,7 +66,7 @@ object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKin
 
   // Delete a context.
   def delete(id: Long)(implicit session: Session, user: UserLike): Option[Context] = {
-
+    // TODO: Update connections to not reference this context.
     patch(id, ContextPatch(visible = Some(false), deleted = Some(true)))
   }
 

@@ -67,6 +67,7 @@ object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with E
 
   // Delete a term.
   def delete(id: Long)(implicit session: Session, user: UserLike): Option[Term] = {
+    // TODO: Update connections to not reference this term.
     patch(id, TermPatch(visible = Some(false), deleted = Some(true)))
   }
 
