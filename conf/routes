@@ -1,0 +1,23 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           controllers.Application.index
+
+# Terms
+POST    /terms                      controllers.TermController.create()
+GET     /terms                      controllers.TermController.query(name: Option[String], slug: Option[String], visible: Boolean ?= true, deleted: Boolean ?= false, createdBy: Option[UserLike])
+DELETE  /terms/:id                  controllers.TermController.delete(id: Long)
+GET     /terms/:id                  controllers.TermController.find(id: Long)
+PUT     /terms/:id                  controllers.TermController.patch(id: Long)
+
+# Votes
+POST    /votes                      controllers.VoteController.create()
+GET     /votes                      controllers.VoteController.query(term: Option[TermLike], context: Option[ContextLike], visible: Boolean ?= true, deleted: Boolean ?= false, createdBy: Option[UserLike])
+DELETE  /votes/:id                  controllers.VoteController.delete(id: Long)
+GET     /votes/:id                  controllers.VoteController.find(id: Long)
+PUT     /votes/:id                  controllers.VoteController.patch(id: Long)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
