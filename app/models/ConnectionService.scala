@@ -11,7 +11,10 @@ import scala.concurrent.Future
 /**
  * Connection Mapper Service
  */
-abstract class ConnectionMapperService(val mapper: ConnectionMapper = Connections) extends EntityMapperService[ConnectionKind] {
+trait ConnectionMapperService extends EntityMapperService[ConnectionKind] {
+
+  // The terms mapper.
+  val mapper = Connections
 
   // Populate the context for a connection.
   def populateContext(connection: Connection): Future[Connection] = {
