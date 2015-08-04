@@ -90,13 +90,12 @@ trait VoteMapperService extends EntityMapperService[VoteKind] {
           val createdByMap = toIdMap(votesWithCreatedBy)
 
           // Combine the values.
-          voteMap.map({
-            case (id, vote) => vote.copy(
+          voteMap.map { case (id, vote) => vote.copy(
               context = contextMap.get(id).map(_.context).getOrElse(vote.context),
               term = termMap.get(id).map(_.term).getOrElse(vote.term),
               createdBy = createdByMap.get(id).map(_.createdBy).getOrElse(vote.createdBy)
             )
-          }).toList
+          } toList
         }
       }
     }

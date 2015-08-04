@@ -10,18 +10,35 @@ import play.api.mvc.QueryStringBindable.Parsing
 trait UserKind extends EntityKind {
 
   // The entity types.
+  type K = UserKind
   type E = User
   type R = UserReference
   type C = User.type
   type F = UserFrom
   type P = UserPatch
   type S = UserSearch
+  type M = UserMapper
 
   // The entity companion.
   val companion = User
 
   // Convert a user to a reference.
   def toReference(user: User): UserReference = UserReference(user.id)
+}
+
+/**
+ * User Exception Classes
+ */
+abstract class UserException(message: String, cause: Throwable = null) extends RuntimeException(message, cause)
+case class UsernameExistsException(message: String, cause: Throwable = null) extends UserException(message, cause)
+
+/**
+ * User Exception Companion
+ */
+object UsernameExistsException {
+
+  // Convert to and from JSON.
+  implicit val jsonFormat = Json.format[UsernameExistsException]
 }
 
 /**
@@ -71,7 +88,7 @@ object UserLike {
  *
  * @type {UserFrom}
  */
-case class UserFrom(val name: String, val username: String) extends EntityFrom with UserKind
+case class UserFrom(val name: String, val username: String, val password: Password) extends EntityFrom with UserKind
 
 /**
  * User From Companion
@@ -90,7 +107,8 @@ object UserFrom {
 case class UserPatch(
   val name: Option[String] = None,
   val visible: Option[Boolean] = None,
-  val deleted: Option[Boolean] = None
+  val deleted: Option[Boolean] = None,
+  val password: Option[Password] = None
 ) extends EntityPatch with UserKind
 
 /**
@@ -141,6 +159,7 @@ case class User(
   val id: Option[Long] = None,
   val name: String,
   val username: String,
+  val password: Password,
   val visible: Boolean = true,
   val deleted: Boolean = false,
   val createdAt: DateTime

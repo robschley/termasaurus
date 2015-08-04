@@ -88,12 +88,11 @@ trait TermMapperService extends EntityMapperService[TermKind] {
         val createdByMap = toIdMap(termsWithCreatedBy)
 
         // Combine the values.
-        termMap.map({
-          case (id, term) => term.copy(
+        termMap.map { case (id, term) => term.copy(
             connections = connectionMap.get(id).map(_.connections).getOrElse(term.connections),
             createdBy = createdByMap.get(id).map(_.createdBy).getOrElse(term.createdBy)
           )
-        }).toList
+        } toList
       }
     }
   }

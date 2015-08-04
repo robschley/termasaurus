@@ -24,9 +24,9 @@ class Votes(tag: Tag) extends Table[Vote](tag, "votes") {
 }
 
 /**
- * Votes Mapper
+ * Votes Mapper Class
  */
-object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with EntityCreatorMapper[VoteKind] with VoteKind {
+class VoteMapper extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with EntityCreatorMapper[VoteKind] with VoteKind {
 
   // Vote query extensions.
   implicit class VoteQueryExtensions(val query: Query[Votes, Vote, Seq]) {
@@ -35,7 +35,7 @@ object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with E
     def search(search: VoteSearch): Query[Votes, Vote, Seq] = {
       query
         .filterMaybe(search.id, _.id === search.id)
-        .filterMaybe(search.ids, _.id inSet search.ids.get)
+        .filterMaybe(search.ids, _.id inSet search.ids.getOrElse(Set.empty[Long]))
         .filterMaybe(search.term, _.term === search.term)
         .filterMaybe(search.context, _.context === search.context)
         .filterMaybe(search.visible, _.visible === search.visible)
@@ -46,7 +46,7 @@ object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with E
 
   // Count the votes matching the search parameters.
   def count(search: VoteSearch)(implicit session: Session): Long = {
-    Votes.search(search).length.run
+    this.search(search).length.run
   }
 
   // Create a vote.
@@ -71,12 +71,12 @@ object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with E
       )
 
       // Create the vote.
-      val id = Votes.returning(Votes.map(_.id)).insert(creating)
+      val id = this.returning(this.map(_.id)).insert(creating)
       creating.copy(id = id)
 
       // If a connection exists for this term and context, update the vote count. Otherwise, create a connection.
       val connection = Connections.findOne(ConnectionSearch.fromVote(creating)).flatMap { connection =>
-        Connections.patch(connection.id, ConnectionPatch(votes = Some(Votes.count(VoteSearch.fromConnection(connection)))))
+        Connections.patch(connection.id, ConnectionPatch(votes = Some(this.count(VoteSearch.fromConnection(connection)))))
       } getOrElse {
         Connections.create(ConnectionFrom.fromVote(creating))
       }
@@ -106,7 +106,7 @@ object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with E
       Connections.findOne(ConnectionSearch.fromVote(vote)).flatMap { connection =>
 
         // Count the votes.
-        val votes = Votes.count(VoteSearch.fromConnection(connection))
+        val votes = this.count(VoteSearch.fromConnection(connection))
 
         // If the connection still has votes, update the vote count. Otherwise, update and delete.
         if (votes > 0) {
@@ -122,22 +122,22 @@ object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with E
 
   // Find a vote by ID.
   def find(id: Long)(implicit session: Session): Option[Vote] = {
-    Votes.filter(_.id === id).firstOption
+    this.filter(_.id === id).firstOption
   }
 
   // Find the votes matching the set of IDs.
   def find(ids: Set[Long])(implicit session: Session): Map[Long, Vote] = {
-    toIdMap(Votes.filter(_.id inSet ids).list)
+    toIdMap(this.filter(_.id inSet ids).list)
   }
 
   // Find the votes matching the search parameters.
   def find(search: VoteSearch)(implicit session: Session): List[Vote] = {
-    Votes.search(search).list
+    this.search(search).list
   }
 
   // Find a vote matching the search parameters.
   def findOne(search: VoteSearch)(implicit session: Session): Option[Vote] = {
-    Votes.search(search).firstOption
+    this.search(search).firstOption
   }
 
   // Patch a vote by ID.
@@ -153,7 +153,7 @@ object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with E
       )
 
       // Patch the vote.
-      Votes.filter(_.id === id).update(patching)
+      this.filter(_.id === id).update(patching)
       patching
     }
   }
@@ -209,3 +209,8 @@ object Votes extends TableQuery(new Votes(_)) with EntityMapper[VoteKind] with E
     ref.id.flatMap(find).orElse(ref.from.map(create)).getOrElse(throw EntityReferenceException("Could not resolve vote reference."))
   }
 }
+
+/**
+ * Vote Mapper Companion
+ */
+object Votes extends VoteMapper

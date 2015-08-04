@@ -10,12 +10,14 @@ import play.api.mvc.QueryStringBindable.Parsing
 trait VoteKind extends EntityKind {
 
   // The entity types.
+  type K = VoteKind
   type E = Vote
   type R = VoteReference
   type C = Vote.type
   type F = VoteFrom
   type P = VotePatch
   type S = VoteSearch
+  type M = VoteMapper
 
   // The entity companion.
   val companion = Vote

@@ -11,10 +11,7 @@ import scala.concurrent.Future
 /**
  * Connection Mapper Service
  */
-trait ConnectionMapperService extends EntityMapperService[ConnectionKind] {
-
-  // The connections mapper.
-  val mapper = Connections
+abstract class ConnectionMapperService(val mapper: ConnectionMapper = Connections) extends EntityMapperService[ConnectionKind] {
 
   // Populate the context for a connection.
   def populateContext(connection: Connection): Future[Connection] = {
@@ -87,13 +84,12 @@ trait ConnectionMapperService extends EntityMapperService[ConnectionKind] {
           val createdByMap = toIdMap(connectionsWithCreatedBy)
 
           // Combine the values.
-          connectionMap.map({
-            case (id, connection) => connection.copy(
+          connectionMap.map { case (id, connection) => connection.copy(
               context = contextMap.get(id).map(_.context).getOrElse(connection.context),
               term = termMap.get(id).map(_.term).getOrElse(connection.term),
               createdBy = createdByMap.get(id).map(_.createdBy).getOrElse(connection.createdBy)
             )
-          }).toList
+          } toList
         }
       }
     }
@@ -119,7 +115,7 @@ trait ConnectionMapperService extends EntityMapperService[ConnectionKind] {
 }
 
 /**
- * Connection Service
+ * Connection Service Class
  */
 class ConnectionService(val system: ActorSystem) extends ConnectionMapperService {
 

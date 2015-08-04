@@ -10,12 +10,14 @@ import play.api.mvc.QueryStringBindable.Parsing
 trait ConnectionKind extends EntityKind {
 
   // The entity types.
+  type K = ConnectionKind
   type E = Connection
   type R = ConnectionReference
   type C = Connection.type
   type F = ConnectionFrom
   type P = ConnectionPatch
   type S = ConnectionSearch
+  type M = ConnectionMapper
 
   // The entity companion.
   val companion = Connection

@@ -88,12 +88,11 @@ trait ContextMapperService extends EntityMapperService[ContextKind] {
         val createdByMap = toIdMap(contextsWithCreatedBy)
 
         // Combine the values.
-        contextMap.map({
-          case (id, context) => context.copy(
+        contextMap.map { case (id, context) => context.copy(
             connections = connectionMap.get(id).map(_.connections).getOrElse(context.connections),
             createdBy = createdByMap.get(id).map(_.createdBy).getOrElse(context.createdBy)
           )
-        }).toList
+        } toList
       }
     }
   }

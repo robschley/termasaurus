@@ -1,5 +1,6 @@
 package controllers
 
+import actions._
 import models._
 import play.api._
 import play.api.libs.concurrent.Akka
@@ -22,22 +23,18 @@ trait EntityController[K <: EntityKind] extends Controller {
   implicit val jsonFormatPatch: Format[K#P]
 
   // Create an entity.
-  def create() = Action.async(parse.json) { request =>
-
-    implicit val user: UserLike = UserReference(Some(42)) // TODO: Fix this.
-
+  def create() = Authenticated.async(parse.json) { request =>
+    implicit val user = request.user
     request.body.validate[K#F].map { from =>
       service.create(from).flatMap(e => populateDefaults(e).map(e => Ok(Json.toJson(e))))
     } recoverTotal { errors =>
-      Future.successful(BadRequest(JsError.toFlatJson(errors)))
+      Future.successful(BadRequest(Json.toJson(errors)))
     }
   }
 
   // Delete an entity.
-  def delete(id: Long) = Action.async(parse.json) { request =>
-
-    implicit val user: UserLike = UserReference(Some(42)) // TODO: Fix this.
-
+  def delete(id: Long) = Authenticated.async(parse.json) { request =>
+    implicit val user = request.user
     service.delete(id: Long).map(_.map(e => NoContent).getOrElse(NotFound))
   }
 
@@ -56,14 +53,12 @@ trait EntityController[K <: EntityKind] extends Controller {
   }
 
   // Patch an entity.
-  def patch(id: Long) = Action.async(parse.json) { request =>
-
-    implicit val user: UserLike = UserReference(Some(42)) // TODO: Fix this.
-
+  def patch(id: Long) = Authenticated.async(parse.json) { request =>
+    implicit val user = request.user
     request.body.validate[K#P].map { patch =>
       service.patch(id, patch).flatMap(_.map(e => populateDefaults(e).map(e => Ok(Json.toJson(e)))).getOrElse(Future.successful(NotFound)))
     } recoverTotal { errors =>
-      Future.successful(BadRequest(JsError.toFlatJson(errors)))
+      Future.successful(BadRequest(Json.toJson(errors)))
     }
   }
 

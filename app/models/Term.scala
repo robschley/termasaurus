@@ -10,12 +10,14 @@ import play.api.mvc.QueryStringBindable.Parsing
 trait TermKind extends EntityKind {
 
   // The entity types.
+  type K = TermKind
   type E = Term
   type R = TermReference
   type C = Term.type
   type F = TermFrom
   type P = TermPatch
   type S = TermSearch
+  type M = TermMapper
 
   // The entity companion.
   val companion = Term

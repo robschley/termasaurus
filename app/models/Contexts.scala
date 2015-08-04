@@ -25,9 +25,9 @@ class Contexts(tag: Tag) extends Table[Context](tag, "contexts") {
 }
 
 /**
- * Contexts Mapper
+ * Contexts Mapper Class
  */
-object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKind] with EntityCreatorMapper[ContextKind] with ContextKind {
+class ContextMapper extends TableQuery(new Contexts(_)) with EntityMapper[ContextKind] with EntityCreatorMapper[ContextKind] with ContextKind {
 
   // Context query extensions.
   implicit class ContextQueryExtensions(val query: Query[Contexts, Context, Seq]) {
@@ -36,7 +36,7 @@ object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKin
     def search(search: ContextSearch): Query[Contexts, Context, Seq] = {
       query
         .filterMaybe(search.id, _.id === search.id)
-        .filterMaybe(search.ids, _.id inSet search.ids.get)
+        .filterMaybe(search.ids, _.id inSet search.ids.getOrElse(Set.empty[Long]))
         .filterMaybe(search.name, _.name === search.name)
         .filterMaybe(search.visible, _.visible === search.visible)
         .filterMaybe(search.deleted, _.deleted === search.deleted)
@@ -46,7 +46,7 @@ object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKin
 
   // Count the contexts matching the search parameters.
   def count(search: ContextSearch)(implicit session: Session): Long = {
-    Contexts.search(search).length.run
+    this.search(search).length.run
   }
 
   // Create a context.
@@ -60,7 +60,7 @@ object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKin
     )
 
     // Create the context.
-    val id = Contexts.returning(Contexts.map(_.id)).insert(creating)
+    val id = this.returning(this.map(_.id)).insert(creating)
     creating.copy(id = id)
   }
 
@@ -72,22 +72,22 @@ object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKin
 
   // Find a context by ID.
   def find(id: Long)(implicit session: Session): Option[Context] = {
-    Contexts.filter(_.id === id).firstOption
+    this.filter(_.id === id).firstOption
   }
 
   // Find the contexts matching the set of IDs.
   def find(ids: Set[Long])(implicit session: Session): Map[Long, Context] = {
-    toIdMap(Contexts.filter(_.id inSet ids).list)
+    toIdMap(this.filter(_.id inSet ids).list)
   }
 
   // Find the contexts matching the search parameters.
   def find(search: ContextSearch)(implicit session: Session): List[Context] = {
-    Contexts.search(search).list
+    this.search(search).list
   }
 
   // Find a context matching the search parameters.
   def findOne(search: ContextSearch)(implicit session: Session): Option[Context] = {
-    Contexts.search(search).firstOption
+    this.search(search).firstOption
   }
 
   // Patch a context by ID.
@@ -105,7 +105,7 @@ object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKin
       )
 
       // Patch the context.
-      Contexts.filter(_.id === id).update(patching)
+      this.filter(_.id === id).update(patching)
       patching
     }
   }
@@ -149,3 +149,8 @@ object Contexts extends TableQuery(new Contexts(_)) with EntityMapper[ContextKin
     ref.id.flatMap(find).orElse(ref.from.map(create)).getOrElse(throw EntityReferenceException("Could not resolve context reference."))
   }
 }
+
+/**
+ * Context Mapper Companion
+ */
+object Contexts extends ContextMapper

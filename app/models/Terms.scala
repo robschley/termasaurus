@@ -25,9 +25,9 @@ class Terms(tag: Tag) extends Table[Term](tag, "terms") {
 }
 
 /**
- * Terms Mapper
+ * Terms Mapper Class
  */
-object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with EntityCreatorMapper[TermKind] with TermKind {
+class TermMapper extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with EntityCreatorMapper[TermKind] with TermKind {
 
   // Term query extensions.
   implicit class TermQueryExtensions(val query: Query[Terms, Term, Seq]) {
@@ -36,7 +36,7 @@ object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with E
     def search(search: TermSearch): Query[Terms, Term, Seq] = {
       query
         .filterMaybe(search.id, _.id === search.id)
-        .filterMaybe(search.ids, _.id inSet search.ids.get)
+        .filterMaybe(search.ids, _.id inSet search.ids.getOrElse(Set.empty[Long]))
         .filterMaybe(search.name, _.name === search.name)
         .filterMaybe(search.visible, _.visible === search.visible)
         .filterMaybe(search.deleted, _.deleted === search.deleted)
@@ -46,7 +46,7 @@ object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with E
 
   // Count the terms matching the search parameters.
   def count(search: TermSearch)(implicit session: Session): Long = {
-    Terms.search(search).length.run
+    this.search(search).length.run
   }
 
   // Create a term.
@@ -61,7 +61,7 @@ object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with E
     )
 
     // Create the term.
-    val id = Terms.returning(Terms.map(_.id)).insert(creating)
+    val id = this.returning(this.map(_.id)).insert(creating)
     creating.copy(id = id)
   }
 
@@ -73,22 +73,22 @@ object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with E
 
   // Find a term by ID.
   def find(id: Long)(implicit session: Session): Option[Term] = {
-    Terms.filter(_.id === id).firstOption
+    this.filter(_.id === id).firstOption
   }
 
   // Find the terms matching the set of IDs.
   def find(ids: Set[Long])(implicit session: Session): Map[Long, Term] = {
-    toIdMap(Terms.filter(_.id inSet ids).list)
+    toIdMap(this.filter(_.id inSet ids).list)
   }
 
   // Find the terms matching the search parameters.
   def find(search: TermSearch)(implicit session: Session): List[Term] = {
-    Terms.search(search).list
+    this.search(search).list
   }
 
   // Find a term matching the search parameters.
   def findOne(search: TermSearch)(implicit session: Session): Option[Term] = {
-    Terms.search(search).firstOption
+    this.search(search).firstOption
   }
 
   // Patch a term by ID.
@@ -107,7 +107,7 @@ object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with E
       )
 
       // Patch the term.
-      Terms.filter(_.id === id).update(patching)
+      this.filter(_.id === id).update(patching)
       patching
     }
   }
@@ -154,3 +154,8 @@ object Terms extends TableQuery(new Terms(_)) with EntityMapper[TermKind] with E
       .getOrElse(throw EntityReferenceException("Could not resolve term reference."))
   }
 }
+
+/**
+ * Term Mapper Companion
+ */
+object Terms extends TermMapper

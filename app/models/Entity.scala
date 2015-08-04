@@ -64,13 +64,6 @@ trait EntityRevision extends HasPrimaryId with HasCreator {
 }
 
 /**
- * Entity Relationship Trait
- */
-// trait EntityRelationship {
-
-// }
-
-/**
  * Entity Trait
  */
 trait Entity extends EntityLike {
@@ -87,7 +80,7 @@ trait EntityCompanion {
   this: EntityKind =>
 
   // Create a reference from an entity.
-  // def toRef(entity: E): R
+  def toRef(entity: E): R
 
   // Convert to and from JSON.
   val jsonFormat: Format[E]
@@ -100,12 +93,13 @@ trait EntityKind {
 
   // The entity types.
   type E <: Entity
+  type K <: EntityKind
   type R <: EntityReference
   type C <: EntityCompanion
   type F <: EntityFrom
   type P <: EntityPatch
   type S <: EntitySearch
-  type M <: EntityMapper[this.type]
+  type M <: EntityMapper[K]
 
   // The entity companion.
   val companion: C

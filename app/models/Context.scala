@@ -10,12 +10,14 @@ import play.api.mvc.QueryStringBindable.Parsing
 trait ContextKind extends EntityKind {
 
   // The entity types.
+  type K = ContextKind
   type E = Context
   type R = ContextReference
   type C = Context.type
   type F = ContextFrom
   type P = ContextPatch
   type S = ContextSearch
+  type M = ContextMapper
 
   // The entity companion.
   val companion = Context

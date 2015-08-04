@@ -1,4 +1,4 @@
-package models
+ package models
 
 import com.github.tototoshi.slick.MySQLJodaSupport._
 import play.api.db.slick.Config.driver.simple._
@@ -25,9 +25,9 @@ class Connections(tag: Tag) extends Table[Connection](tag, "connections") {
 }
 
 /**
- * Connections Mapper
+ * Connections Mapper Class
  */
-object Connections extends TableQuery(new Connections(_)) with EntityMapper[ConnectionKind] with EntityCreatorMapper[ConnectionKind] {
+class ConnectionMapper extends TableQuery(new Connections(_)) with EntityMapper[ConnectionKind] with EntityCreatorMapper[ConnectionKind] {
 
   // Connection query extensions.
   implicit class ConnectionQueryExtensions(val query: Query[Connections, Connection, Seq]) {
@@ -36,7 +36,7 @@ object Connections extends TableQuery(new Connections(_)) with EntityMapper[Conn
     def search(search: ConnectionSearch): Query[Connections, Connection, Seq] = {
       query
         .filterMaybe(search.id, _.id === search.id)
-        .filterMaybe(search.ids, _.id inSet search.ids.get)
+        .filterMaybe(search.ids, _.id inSet search.ids.getOrElse(Set.empty[Long]))
         .filterMaybe(search.term, _.term === search.term)
         .filterMaybe(search.context, _.context === search.context)
         .filterMaybe(search.visible, _.visible === search.visible)
@@ -47,7 +47,7 @@ object Connections extends TableQuery(new Connections(_)) with EntityMapper[Conn
 
   // Count the connections matching the search parameters.
   def count(search: ConnectionSearch)(implicit session: Session): Long = {
-    Connections.search(search).length.run
+    this.search(search).length.run
   }
 
   // Create a connection.
@@ -63,7 +63,7 @@ object Connections extends TableQuery(new Connections(_)) with EntityMapper[Conn
     )
 
     // Create the connection.
-    val id = Connections.returning(Connections.map(_.id)).insert(creating)
+    val id = this.returning(this.map(_.id)).insert(creating)
     creating.copy(id = id)
   }
 
@@ -74,22 +74,22 @@ object Connections extends TableQuery(new Connections(_)) with EntityMapper[Conn
 
   // Find a connection by ID.
   def find(id: Long)(implicit session: Session): Option[Connection] = {
-    Connections.filter(_.id === id).firstOption
+    this.filter(_.id === id).firstOption
   }
 
   // Find the connections matching the set of IDs.
   def find(ids: Set[Long])(implicit session: Session): Map[Long, Connection] = {
-    toIdMap(Connections.filter(_.id inSet ids).list)
+    toIdMap(this.filter(_.id inSet ids).list)
   }
 
   // Find the connections matching the search parameters.
   def find(search: ConnectionSearch)(implicit session: Session): List[Connection] = {
-    Connections.search(search).list
+    this.search(search).list
   }
 
   // Find a connection matching the search parameters.
   def findOne(search: ConnectionSearch)(implicit session: Session): Option[Connection] = {
-    Connections.search(search).firstOption
+    this.search(search).firstOption
   }
 
   // Patch a connection by ID.
@@ -106,7 +106,7 @@ object Connections extends TableQuery(new Connections(_)) with EntityMapper[Conn
       )
 
       // Patch the connection.
-      Connections.filter(_.id === id).update(patching)
+      this.filter(_.id === id).update(patching)
       patching
     }
   }
@@ -162,3 +162,8 @@ object Connections extends TableQuery(new Connections(_)) with EntityMapper[Conn
     ref.id.flatMap(find).orElse(ref.from.map(create)).getOrElse(throw EntityReferenceException("Could not resolve connection reference."))
   }
 }
+
+/**
+ * Connection Mapper Companion
+ */
+object Connections extends ConnectionMapper
