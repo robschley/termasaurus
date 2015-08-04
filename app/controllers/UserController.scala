@@ -45,17 +45,11 @@ object UserController extends EntityController[UserKind] {
 
   // Get an entity.
   override def find(id: Long) = Authenticated.async { request =>
-    // service.find(id).flatMap(_.map(e => populateDefaults(e).map(e => Ok(Json.toJson(e)))).getOrElse(Future.successful(NotFound)))
     Future.successful(Forbidden)
   }
 
   // Get a list of entities that match the search parameters.
   override def find(search: UserSearch) = Authenticated.async { request =>
-    // service.find(search).flatMap { list =>
-    //   populateDefaults(list).map { list =>
-    //     Ok(Json.toJson(list))
-    //   }
-    // }
     Future.successful(Forbidden)
   }
 
