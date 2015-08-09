@@ -29,7 +29,7 @@ trait ConnectionKind extends EntityKind {
 /**
  * Connection Like Trait
  */
-trait ConnectionLike extends EntityLike with ConnectionKind
+sealed trait ConnectionLike extends EntityLike with ConnectionKind
 
 /**
  * Connection Like Companion

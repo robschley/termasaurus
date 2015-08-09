@@ -44,7 +44,7 @@ object UsernameExistsException {
 /**
  * User Like Trait
  */
-trait UserLike extends EntityLike with UserKind
+sealed trait UserLike extends EntityLike with UserKind
 
 /**
  * User Like Companion

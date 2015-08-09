@@ -29,7 +29,7 @@ trait VoteKind extends EntityKind {
 /**
  * Vote Like Trait
  */
-trait VoteLike extends EntityLike with VoteKind
+sealed trait VoteLike extends EntityLike with VoteKind
 
 /**
  * Vote Like Companion

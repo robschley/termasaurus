@@ -29,7 +29,7 @@ trait ContextKind extends EntityKind {
 /**
  * Context Like Trait
  */
-trait ContextLike extends EntityLike with ContextKind
+sealed trait ContextLike extends EntityLike with ContextKind
 
 /**
  * Context Like Companion

@@ -29,7 +29,7 @@ trait TermKind extends EntityKind {
 /**
  * Term Like Trait
  */
-trait TermLike extends EntityLike with TermKind
+sealed trait TermLike extends EntityLike with TermKind
 
 /**
  * Term Like Companion
