@@ -2,6 +2,7 @@ package controllers
 
 import actions._
 import models._
+import play.api.data.validation.ValidationError
 import play.api.libs.concurrent.Akka
 import play.api.libs.json._
 import play.api.mvc._
@@ -29,13 +30,16 @@ object UserController extends EntityController[UserKind] {
     implicit val user: UserLike = UserReference(None)
 
     // Create the user.
-    request.body.validate[UserFrom].map { from =>
-      service.create(from).flatMap(e => populateDefaults(e).map(e => Ok(Json.toJson(e)))) recover {
-        case err: UsernameExistsException => Conflict(Json.toJson(err))
+    request.body
+      .validate[UserFrom]
+      // .filter(ValidationError("Invalid email address"))((a: UserFrom) => false)
+      .map { from =>
+        service.create(from).flatMap(e => populateDefaults(e).map(e => Ok(Json.toJson(e)))) recover {
+          case err: UsernameExistsException => Conflict(Json.toJson(err))
+        }
+      } recoverTotal { errors =>
+        Future.successful(BadRequest(Json.toJson(errors)))
       }
-    } recoverTotal { errors =>
-      Future.successful(BadRequest(Json.toJson(errors)))
-    }
   }
 
   // Get the authenticated user.

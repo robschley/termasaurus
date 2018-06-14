@@ -2,6 +2,8 @@ package actions
 
 import models._
 import play.api.libs.concurrent.Akka
+import play.api.libs.json.{ util => _, _ }
+import play.api.http.Writeable
 import play.api.mvc._
 import play.api.mvc.Results._
 import play.api.Play.current
@@ -63,4 +65,11 @@ object Authenticated extends ActionBuilder[AuthenticatedRequest] {
       Future.successful(Unauthorized("You must log in."))
     }
   }
+
+  // def encodeMessage[A, C](request: Request[A], message: String)(implicit writeable: Writeable[C]): C = {
+  //   request.contentType match {
+  //     case Some("application/json") => Json.obj("message" -> message)
+  //     case _ => message
+  //   }
+  // }
 }

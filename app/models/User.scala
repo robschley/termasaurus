@@ -88,7 +88,11 @@ object UserLike {
  *
  * @type {UserFrom}
  */
-case class UserFrom(val name: String, val username: String, val password: Password) extends EntityFrom with UserKind
+case class UserFrom(
+  val name: String,
+  val username: String,
+  val password: Password
+) extends EntityFrom with UserKind
 
 /**
  * User From Companion

@@ -66,9 +66,9 @@ package object models {
         // Display the proper message depending on the number of missing properties.
         Json.obj(
           props.size match {
-            case 1 => "message" -> ("Property " + props.mkString("") + " is required.")
-            case 2 => "message" -> ("Properties " + props.mkString(" and ") + " are required.")
-            case _ => "message" -> ("Properties " + props.slice(0, props.size - 1).mkString(", ") +" and " + props.slice(props.size - 1, props.size).mkString(", ") + " are required.")
+            case 1 => "message" -> ("Property `" + props.mkString("") + "` is required.")
+            case 2 => "message" -> ("Properties `" + props.mkString("` and `") + "` are required.")
+            case _ => "message" -> ("Properties `" + props.slice(0, props.size - 1).mkString("`, `") + "` and `" + props.slice(props.size - 1, props.size).mkString("`, `") + "` are required.")
           }
         )
       }
